@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>COWASH LAUNDRY — Staff Price System</title>
+<style>
+:root{--blue:#0b83f6;--dark:#111;--bg:#f4f6fa;--card:#fff;--line:#dde2ea;--muted:#667085;--green:#16a34a;--red:#dc2626}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:#111827;font-family:Arial,"Noto Sans SC",sans-serif}
+header{height:92px;background:#000;display:flex;align-items:center;justify-content:space-between;padding:10px 20px}
+.logo{height:72px;max-width:240px;object-fit:contain;background:#fff}.lang{padding:11px 13px;border-radius:10px;font-size:16px}
+main{max-width:1180px;margin:auto;padding:18px 15px 50px}.tabs{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:16px}
+.tab,.btn{border:0;border-radius:11px;padding:12px 18px;font-weight:800;font-size:16px;cursor:pointer}.tab{background:#e7ecf3}.tab.active{background:#111;color:#fff}
+.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:19px;margin-bottom:16px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}label{font-weight:800;display:block;margin-bottom:6px}
+input,select{width:100%;padding:12px 13px;border:1px solid #cbd2dc;border-radius:10px;background:#fff;font-size:16px}
+.locked{background:#eef1f5;color:#667085}.blue{background:var(--blue);color:#fff}.black{background:#111;color:#fff}.green{background:var(--green);color:#fff}.red{background:var(--red);color:#fff}.gray{background:#e9edf3;color:#111827}
+.small{font-size:13px;color:var(--muted)}.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:13px}
+.nwash{border:2px solid #cfe3ff}.title{font-size:25px;font-weight:900}.rate{font-size:20px;font-weight:800;margin:6px 0 13px}
+.nwgrid{display:grid;grid-template-columns:1fr 170px 170px;gap:10px;align-items:end}
+.searchrow{display:flex;gap:8px}.searchrow input{flex:1}.results{display:grid;gap:8px;margin-top:10px}
+.result{display:grid;grid-template-columns:1fr auto 105px auto;gap:10px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:12px}
+.result .name{font-weight:900}.price{font-weight:900;white-space:nowrap}.notset{color:var(--red)}
+.cartrow{display:grid;grid-template-columns:1fr auto auto auto;gap:10px;align-items:center;padding:11px 0;border-bottom:1px solid #e7e9ee}
+.qty{display:flex;align-items:center;gap:6px}.qty button{width:32px;height:32px;border:0;border-radius:8px;background:#edf1f5;font-size:18px;font-weight:900}
+.totalbox{display:flex;justify-content:space-between;align-items:center;margin-top:14px;font-size:22px;font-weight:900}.total{font-size:31px}
+.status{display:inline-block;padding:6px 10px;border-radius:999px;font-weight:900;font-size:13px}.paid{background:#dcfce7;color:#15803d}.unpaid{background:#fee2e2;color:#b91c1c}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}.kpi{background:#fff;border:1px solid var(--line);border-radius:14px;padding:13px}.kpi b{display:block;font-size:24px;margin-top:4px}
+table{width:100%;border-collapse:collapse}th,td{padding:9px;border-bottom:1px solid #e5e7eb;text-align:left;vertical-align:middle}
+.hidden{display:none!important}.menuGroup{font-weight:900;background:#eef5ff;padding:9px;border-radius:8px;margin-top:12px}
+.modal{position:fixed;inset:0;background:#0008;z-index:20;padding:16px;overflow:auto}.modalbox{max-width:900px;margin:25px auto;background:#fff;border-radius:20px;padding:20px}
+@media(max-width:720px){.grid2,.nwgrid,.kpis{grid-template-columns:1fr}.result{grid-template-columns:1fr auto}.cartrow{grid-template-columns:1fr auto}.top{height:80px}.logo{height:60px;max-width:190px}}
+</style>
+</head>
+<body>
+<header>
+<div style="color:white;font-size:26px;font-weight:900;letter-spacing:1px">COWASH LAUNDRY</div>
+<select id="language" class="lang">
+<option value="zh">中文</option><option value="en">English</option><option value="ms">Bahasa Melayu</option><option value="bn">বাংলা</option>
+</select>
+</header>
+
+<main>
+<div class="tabs">
+<button id="staffTab" class="tab active">Staff</button>
+<button id="adminTab" class="tab">Admin</button>
+<button id="menuTab" class="tab">PRICE MENU</button>
+</div>
+
+<section id="staffView">
+<div class="card">
+<h2>建立 D.O.</h2>
+<div class="grid2">
+<div><label>D.O. No.</label><input id="doNo" class="locked" readonly></div>
+<div><label>Customer Name</label><input id="customerName" placeholder="顾客名字"></div>
+<div><label>Phone / Contact No.</label><input id="customerPhone" placeholder="电话号码"></div>
+<div><label>Date 🔒</label><input id="doDate" class="locked" readonly></div>
+<div><label>Time 🔒</label><input id="doTime" class="locked" readonly></div>
+</div>
+<div class="small">Date / Time 自动记录，员工不能修改。</div>
+</div>
+
+<div class="card nwash">
+<div class="title">Garments Normal Wash</div>
+<div class="rate">RM3.50 / KG · Minimum 5 KG</div>
+<div class="nwgrid">
+<div><label>Enter KG</label><input id="washKg" type="number" min="0" step="0.1" placeholder="例如 5"></div>
+<div><label>Charge</label><input id="washCharge" class="locked" readonly value="RM0.00"></div>
+<button id="addWash" class="btn blue">Add to D.O.</button>
+</div>
+<div class="small">低于 5 KG 按 5 KG（RM17.50）计算。</div>
+</div>
+
+<div class="card">
+<h3>Search Item / Treatment / Iron</h3>
+<div class="searchrow"><input id="search" placeholder="例如 T-Shirt / Bedsheets / Treatment / Iron"><button id="clearSearch" class="btn gray">Clear</button></div>
+<div id="results" class="results"></div>
+</div>
+
+<div class="card">
+<h3>Your Items</h3>
+<div id="cart"><div class="small">还没有加入项目。</div></div>
+<div class="totalbox"><span>Estimated Total</span><span id="total" class="total">RM0.00</span></div>
+<div class="grid2" style="margin-top:13px">
+<div><label>Payment Status</label><select id="newPaymentStatus"><option value="UNPAID">🔴 UNPAID / 未付款</option><option value="PAID">🟢 PAID / 已付款</option></select></div>
+<div><label>Payment Method</label><select id="newPaymentMethod"><option value="">—</option><option>Cash</option><option>Bank Transfer</option><option>QR</option></select></div>
+</div>
+<div class="actions">
+<button id="saveDO" class="btn black">SAVE D.O.</button>
+<button id="sendWA" class="btn blue">WhatsApp</button>
+<button id="sendEmail" class="btn blue">Email</button>
+<button id="share" class="btn gray">Share</button>
+</div>
+</div>
+</section>
+
+<section id="adminView" class="hidden">
+<div id="kpis" class="kpis"></div>
+<div class="card">
+<h2>D.O. Records</h2>
+<div class="actions">
+<button class="btn red" id="unpaidBtn">🔴 UNPAID</button><button class="btn green" id="paidBtn">🟢 PAID</button><button class="btn gray" id="allBtn">ALL</button>
+</div>
+<div class="grid2">
+<div><label>Search D.O. / Customer / Phone</label><input id="recordSearch" placeholder="DO000001 或电话号码"></div>
+<div><label>Status</label><select id="recordStatus"><option>ALL</option><option>UNPAID</option><option>PAID</option></select></div>
+</div>
+<div style="overflow:auto;margin-top:12px"><table><thead><tr><th>D.O.</th><th>Customer</th><th>Date</th><th>Total</th><th>Status</th><th>Method</th><th>Action</th></tr></thead><tbody id="records"></tbody></table></div>
+</div>
+<div class="card">
+<h2>Admin Price Management</h2>
+<p class="small">Admin 可以修改 Item、Unit、Price。Staff 只能按照这里设定的 KG / PCS 输入。</p>
+<div style="overflow:auto"><table><thead><tr><th>No.</th><th>Item</th><th>Unit</th><th>Price</th><th>Save</th></tr></thead><tbody id="priceRows"></tbody></table></div>
+</div>
+</section>
+
+<section id="menuView" class="hidden">
+<div class="card"><h2>PRICE MENU / 价格目录</h2><div id="menuTable"></div></div>
+</section>
+</main>
+
+<div id="editModal" class="modal hidden"><div class="modalbox"><h2>Admin Edit D.O.</h2><div id="editBody"></div><div class="actions"><button id="saveRevision" class="btn black">Save Revision</button><button id="closeEdit" class="btn gray">Cancel</button></div></div></div>
+
+<script>
+const WA="60126987319", EMAIL="Edwardchew@cowash.com.my";
+const defaultItems=[
+{no:"GW1",item:"Garments Normal Wash",unit:"KG",price:3.5,cat:"LAUNDRY"},
+{no:"BS1",item:"Bedsheets",unit:"PCS",price:5,cat:"LAUNDRY"},
+{no:"DC1",item:"Duvet Cover",unit:"PCS",price:7,cat:"LAUNDRY"},
+{no:"DI1",item:"Duvet Insert",unit:"PCS",price:18,cat:"LAUNDRY"},
+{no:"TB1",item:"Treatment – T-Shirt",unit:"PCS",price:5,cat:"TREATMENT"},
+{no:"TS1",item:"Treatment – Shirt",unit:"PCS",price:5,cat:"TREATMENT"},
+{no:"TP1",item:"Treatment – Pants",unit:"PCS",price:5,cat:"TREATMENT"},
+{no:"TBS1",item:"Treatment – Bedsheets",unit:"PCS",price:8,cat:"TREATMENT"},
+{no:"TDC1",item:"Treatment – Duvet Cover",unit:"PCS",price:10,cat:"TREATMENT"},
+{no:"IT1",item:"Iron – T-Shirt",unit:"PCS",price:3,cat:"IRON"},
+{no:"IS1",item:"Iron – Shirt",unit:"PCS",price:4,cat:"IRON"},
+{no:"IP1",item:"Iron – Pants",unit:"PCS",price:4,cat:"IRON"},
+{no:"IB1",item:"Iron – Bedsheets",unit:"PCS",price:5,cat:"IRON"},
+{no:"IC1",item:"Iron – Curtain",unit:"PCS",price:8,cat:"IRON"},
+{no:"SV1",item:"Service Charge",unit:"SERVICE",price:10,cat:"SERVICE"},
+{no:"DL1",item:"Pickup & Delivery",unit:"SERVICE",price:20,cat:"SERVICE"}
+];
+let items=JSON.parse(localStorage.getItem("cowash_items_master")||"null")||defaultItems;
+let records=JSON.parse(localStorage.getItem("cowash_records_master")||"[]");
+let cart=[], filter="ALL", editIndex=null;
+const $=id=>document.getElementById(id);
+const money=n=>"RM"+Number(n||0).toFixed(2);
+function esc(s){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));}
+function now(){let d=new Date();return {date:d.toLocaleDateString("en-GB"),time:d.toLocaleTimeString("en-MY",{hour:"2-digit",minute:"2-digit",second:"2-digit"})}}
+function nextDO(){let max=0;records.forEach(r=>{let n=parseInt(String(r.doNo).split("/")[0].replace(/\D/g,""))||0;max=Math.max(max,n)});return "DO"+String(max+1).padStart(6,"0")}
+function resetForm(){let n=now();$("doNo").value=nextDO();$("doDate").value=n.date;$("doTime").value=n.time;$("customerName").value="";$("customerPhone").value="";$("washKg").value="";$("washCharge").value="RM0.00";$("newPaymentStatus").value="UNPAID";$("newPaymentMethod").value="";cart=[];renderCart();renderTotal();$("search").value="";renderResults();togglePaymentMethod()}
+function togglePaymentMethod(){$("newPaymentMethod").disabled=$("newPaymentStatus").value!=="PAID";if($("newPaymentStatus").value!=="PAID")$("newPaymentMethod").value=""}
+function renderResults(){let q=$("search").value.trim().toLowerCase();if(!q){$("results").innerHTML="";return}let ms=items.filter(x=>(x.no+" "+x.item+" "+x.unit).toLowerCase().includes(q));$("results").innerHTML=ms.map(x=>`<div class="result"><div><div class="name">${esc(x.no)} — ${esc(x.item)}</div><div class="small">${esc(x.unit)}</div></div><div class="price">${x.price==null?'<span class="notset">PRICE NOT SET</span>':money(x.price)+" / "+esc(x.unit)}</div><input id="q_${esc(x.no)}" type="number" min="0" step="${x.unit==="KG"?"0.1":"1"}" placeholder="${x.unit==="KG"?"KG":"Qty"}"><button class="btn blue" ${x.price==null?"disabled":""} onclick="addItem('${x.no}')">Add</button></div>`).join("")||'<div class="small">没有找到项目。</div>'}
+function addItem(no){let x=items.find(a=>a.no===no);if(!x||x.price==null)return;let q=Number($("q_"+no).value||0);if(q<=0){alert(x.unit==="KG"?"请输入 KG":"请输入数量");return}if(x.unit!=="KG")q=Math.floor(q);let c=cart.find(a=>a.no===no);if(c)c.qty+=q;else cart.push({no,qty:q});renderCart();renderTotal()}
+function removeItem(no){cart=cart.filter(x=>x.no!==no);renderCart();renderTotal()}
+function changeQty(no,d){let c=cart.find(x=>x.no===no);if(!c)return;c.qty=Number((c.qty+d).toFixed(2));if(c.qty<=0)removeItem(no);else{renderCart();renderTotal()}}
+function renderCart(){if(!cart.length){$("cart").innerHTML='<div class="small">还没有加入项目。</div>';return}$("cart").innerHTML=cart.map(c=>{let x=items.find(a=>a.no===c.no);return `<div class="cartrow"><div><b>${esc(x.no)} — ${esc(x.item)}</b><div class="small">${money(x.price)} / ${esc(x.unit)}</div></div><div class="qty"><button onclick="changeQty('${x.no}',${x.unit==="KG"?-0.1:-1})">−</button><span>${x.unit==="KG"?Number(c.qty).toFixed(1):c.qty} ${x.unit}</span><button onclick="changeQty('${x.no}',${x.unit==="KG"?0.1:1})">+</button></div><b>${money(x.price*c.qty)}</b><button class="btn red" onclick="removeItem('${x.no}')">Delete</button></div>`}).join("")}
+function calc(){let kg=Number($("washKg").value||0);let total=kg>0?Math.max(5,kg)*3.5:0;$("washCharge").value=money(kg>0?Math.max(5,kg)*3.5:0);cart.forEach(c=>{let x=items.find(a=>a.no===c.no);if(x&&x.no!=="GW1")total+=x.price*c.qty});return total}
+function renderTotal(){$("total").textContent=money(calc())}
+function lines(){return cart.filter(c=>c.no!=="GW1").map(c=>{let x=items.find(a=>a.no===c.no);return {no:x.no,item:x.item,unit:x.unit,qty:c.qty,total:x.price*c.qty}})}
+function quoteText(r){let t=`COWASH LAUNDRY\nD.O. No.: ${r.doNo}\nCustomer: ${r.customerName||"-"}\nPhone: ${r.customerPhone||"-"}\nDate: ${r.date}\nTime: ${r.time}\n`;if(r.washKg>0)t+=`GW1 Garments Normal Wash: ${r.washKg} KG = ${money(r.washTotal)}\n`;r.lines.forEach(x=>t+=`${x.no} ${x.item} x ${x.qty} ${x.unit} = ${money(x.total)}\n`);t+=`TOTAL: ${money(r.total)}\nPAYMENT: ${r.status}${r.method?" / "+r.method:""}\n\nCOWASH Contact: 012-6987319\nEmail: Edwardchew@cowash.com.my`;return t}
+function currentDraft(){let kg=Number($("washKg").value||0);return {doNo:$("doNo").value,customerName:$("customerName").value,customerPhone:$("customerPhone").value,date:$("doDate").value,time:$("doTime").value,washKg:kg,washTotal:kg>0?Math.max(5,kg)*3.5:0,lines:lines(),total:calc(),status:$("newPaymentStatus").value,method:$("newPaymentMethod").value}}
+function saveDO(){let r=currentDraft();if(!r.lines.length&&!r.washKg){alert("请先加入项目或输入 Garments KG");return}records.unshift({...r,revision:0,createdAt:Date.now(),paidAt:r.status==="PAID"?Date.now():null});localStorage.setItem("cowash_records_master",JSON.stringify(records));alert("D.O. 已保存："+r.status+(r.method?" / "+r.method:""));resetForm();renderAdmin()}
+function send(type,r){let t=quoteText(r);if(type==="wa")location.href="https://wa.me/"+WA+"?text="+encodeURIComponent(t);else if(type==="email")location.href="mailto:"+EMAIL+"?subject="+encodeURIComponent("COWASH D.O. "+r.doNo)+"&body="+encodeURIComponent(t);else if(navigator.share)navigator.share({title:"COWASH D.O. "+r.doNo,text:t});else navigator.clipboard?.writeText(t).then(()=>alert("Share 内容已复制"))}
+function setFilter(v){filter=v;$("recordStatus").value=v;renderAdmin()}
+function renderAdmin(){let q=($("recordSearch").value||"").toLowerCase(),st=$("recordStatus").value;let rs=records.filter(r=>(st==="ALL"||r.status===st)&&(!q||(r.doNo+" "+r.customerName+" "+r.customerPhone).toLowerCase().includes(q)));$("records").innerHTML=rs.map(r=>{let i=records.indexOf(r);return `<tr><td><b>${esc(r.doNo)}</b></td><td>${esc(r.customerName||"-")}<br><span class="small">${esc(r.customerPhone||"")}</span></td><td>${r.date}<br>${r.time}</td><td>${money(r.total)}</td><td><span class="status ${r.status==="PAID"?"paid":"unpaid"}">${r.status}</span></td><td>${esc(r.method||"—")}</td><td><button class="btn gray" onclick="viewRecord(${i})">View</button> <button class="btn black" onclick="editRecord(${i})">Admin Edit</button> ${r.status==="UNPAID"?'<button class="btn green" onclick="markPaid('+i+')">MARK AS PAID</button>':'<button class="btn gray" disabled>PAID 🔒</button>'} <button class="btn blue" onclick="resend(${i})">Send / Resend</button></td></tr>`}).join("")||'<tr><td colspan="7">没有记录。</td></tr>';let paid=records.filter(r=>r.status==="PAID").length,un=records.filter(r=>r.status==="UNPAID").length,amt=records.reduce((a,r)=>a+r.total,0);$("kpis").innerHTML=`<div class="kpi">TOTAL D.O.<b>${records.length}</b></div><div class="kpi">TOTAL AMOUNT<b>${money(amt)}</b></div><div class="kpi">PAID<b style="color:#15803d">${paid}</b></div><div class="kpi">UNPAID<b style="color:#b91c1c">${un}</b></div>`;renderPrices()}
+function viewRecord(i){alert(quoteText(records[i]))}
+function markPaid(i){let r=records[i];if(r.status==="PAID")return;let method=prompt("Payment Method: Cash / Bank Transfer / QR","QR");if(!["Cash","Bank Transfer","QR"].includes(method))return;r.status="PAID";r.method=method;r.paidAt=Date.now();localStorage.setItem("cowash_records_master",JSON.stringify(records));alert(r.doNo+" 已 PAID 并锁定。");send("wa",r);renderAdmin()}
+function resend(i){send("wa",records[i])}
+function renderPrices(){$("priceRows").innerHTML=items.map((x,i)=>`<tr><td>${x.no}</td><td>${esc(x.item)}</td><td><select id="u${i}"><option ${x.unit==="PCS"?"selected":""}>PCS</option><option ${x.unit==="KG"?"selected":""}>KG</option><option ${x.unit==="SERVICE"?"selected":""}>SERVICE</option></select></td><td><input id="p${i}" type="number" step="0.01" placeholder="PRICE NOT SET" value="${x.price??""}"></td><td><button class="btn black" onclick="savePrice(${i})">Save</button></td></tr>`).join("")}
+function savePrice(i){let v=$("p"+i).value.trim();items[i].unit=$("u"+i).value;items[i].price=v===""?null:Number(v);localStorage.setItem("cowash_items_master",JSON.stringify(items));renderPrices();renderResults();renderMenu()}
+function renderMenu(){let cats=[["LAUNDRY","LAUNDRY / 洗衣"],["TREATMENT","TREATMENT / 特殊处理"],["IRON","IRON / 熨烫"],["SERVICE","SERVICE / 服务"]];$("menuTable").innerHTML=cats.map(([c,t])=>`<div class="menuGroup">${t}</div><table><thead><tr><th>No.</th><th>Item</th><th>Unit</th><th>Price</th></tr></thead><tbody>${items.filter(x=>x.cat===c).map(x=>`<tr><td><b>${x.no}</b></td><td>${esc(x.item)}</td><td>${x.unit}</td><td>${x.price==null?'<span class="notset">PRICE NOT SET</span>':money(x.price)}</td></tr>`).join("")}</tbody></table>`).join("")}
+function editRecord(i){let r=records[i],rev=(r.revision||0)+1;editIndex=i;$("editBody").innerHTML=`<div class="grid2"><div><label>Original D.O.</label><input class="locked" readonly value="${esc(r.doNo)}"></div><div><label>New Revision</label><input class="locked" readonly value="${esc(r.doNo.split("/R")[0])}/R${rev}"></div><div><label>Customer Name</label><input id="eName" value="${esc(r.customerName||"")}"></div><div><label>Phone</label><input id="ePhone" value="${esc(r.customerPhone||"")}"></div></div><h3 style="margin-top:16px">Items</h3>${r.lines.map((x,j)=>`<div class="grid2" style="margin:7px 0"><div><label>${esc(x.no)} — ${esc(x.item)}</label><input id="eq${j}" type="number" step="${x.unit==="KG"?"0.1":"1"}" value="${x.qty}"></div><div><label>Unit Price</label><input id="ep${j}" type="number" step="0.01" value="${(x.total/x.qty).toFixed(2)}"></div></div>`).join("")}<div class="grid2" style="margin-top:10px"><div><label>Garments KG</label><input id="eKg" type="number" step="0.1" value="${r.washKg||0}"></div><div><label>Payment Status</label><select id="eStatus"><option ${r.status==="UNPAID"?"selected":""}>UNPAID</option><option ${r.status==="PAID"?"selected":""}>PAID</option></select></div></div><div><label>Payment Method</label><select id="eMethod"><option value="">—</option><option ${r.method==="Cash"?"selected":""}>Cash</option><option ${r.method==="Bank Transfer"?"selected":""}>Bank Transfer</option><option ${r.method==="QR"?"selected":""}>QR</option></select></div><p class="small">Admin 修改不删除原 D.O.，会产生 /R1、/R2…</p>`;$("editModal").classList.remove("hidden")}
+function saveRevision(){let r=records[editIndex],rev=(r.revision||0)+1,base=r.doNo.split("/R")[0],newNo=base+"/R"+rev,lines=r.lines.map((x,j)=>{let q=Number($("eq"+j).value||0),p=Number($("ep"+j).value||0);return {...x,qty:q,total:q*p}}).filter(x=>x.qty>0),kg=Number($("eKg").value||0),wt=kg>0?Math.max(5,kg)*3.5:0,total=wt+lines.reduce((a,x)=>a+x.total,0);let nr={...r,doNo:newNo,revision:rev,revisedFrom:r.doNo,customerName:$("eName").value,customerPhone:$("ePhone").value,washKg:kg,washTotal:wt,lines,total,status:$("eStatus").value,method:$("eMethod").value,revisionAt:Date.now()};records.unshift(nr);localStorage.setItem("cowash_records_master",JSON.stringify(records));$("editModal").classList.add("hidden");alert("已保存 "+newNo+"，原 D.O. 保留。");renderAdmin()}
+function show(v){$("staffView").classList.toggle("hidden",v!=="staff");$("adminView").classList.toggle("hidden",v!=="admin");$("menuView").classList.toggle("hidden",v!=="menu");$("staffTab").classList.toggle("active",v==="staff");$("adminTab").classList.toggle("active",v==="admin");$("menuTab").classList.toggle("active",v==="menu");if(v==="admin")renderAdmin();if(v==="menu")renderMenu()}
+function setLang(){let l=$("language").value;let t={zh:["搜索 Item / Treatment / Iron","清除"],en:["Search Item / Treatment / Iron","Clear"],ms:["Cari Item / Treatment / Iron","Padam"],bn:["আইটেম / Treatment / Iron খুঁজুন","মুছুন"]}[l];$("search").placeholder=t[0];$("clearSearch").textContent=t[1]}
+$("staffTab").onclick=()=>show("staff");$("adminTab").onclick=()=>show("admin");$("menuTab").onclick=()=>show("menu");$("language").onchange=setLang;$("search").oninput=renderResults;$("clearSearch").onclick=()=>{$("search").value="";renderResults()};$("washKg").oninput=renderTotal;$("addWash").onclick=()=>{let kg=Number($("washKg").value||0);if(kg<=0)return;let c=cart.find(x=>x.no==="GW1");if(c)c.qty=kg;else cart.push({no:"GW1",qty:kg});renderCart();renderTotal()};$("newPaymentStatus").onchange=togglePaymentMethod;$("saveDO").onclick=saveDO;$("sendWA").onclick=()=>send("wa",currentDraft());$("sendEmail").onclick=()=>send("email",currentDraft());$("share").onclick=()=>send("share",currentDraft());$("recordSearch").oninput=renderAdmin;$("recordStatus").onchange=renderAdmin;$("unpaidBtn").onclick=()=>setFilter("UNPAID");$("paidBtn").onclick=()=>setFilter("PAID");$("allBtn").onclick=()=>setFilter("ALL");$("saveRevision").onclick=saveRevision;$("closeEdit").onclick=()=>$("editModal").classList.add("hidden");
+resetForm();renderMenu();renderAdmin();setLang();
+</script>
+</body>
+</html>

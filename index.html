@@ -5,6 +5,105 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>COWASH LAUNDRY — Staff Price System</title>
 <style>
+  /* LOGIN SCREEN */
+.loginScreen{
+  position:fixed;
+  inset:0;
+  background:#fff;
+  z-index:9999;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:30px 20px;
+}
+
+.loginInLogo{
+  text-align:center;
+  margin-bottom:35px;
+}
+
+.loginInLogo .cowash{
+  font-size:72px;
+  font-weight:900;
+  letter-spacing:2px;
+  color:#000;
+}
+
+.loginInLogo .laundry{
+  font-size:28px;
+  font-weight:900;
+  color:#111;
+  text-align:right;
+  margin-top:-8px;
+}
+
+.loginCard{
+  width:100%;
+  max-width:650px;
+  background:#fff;
+  border:1px solid #e5e7eb;
+  border-radius:24px;
+  padding:48px 45px;
+  box-shadow:0 8px 30px rgba(0,0,0,.08);
+  text-align:left;
+}
+
+.loginCard h2{
+  text-align:center;
+  font-size:42px;
+  margin:0 0 12px;
+  color:#111;
+}
+
+.loginSub{
+  text-align:center;
+  color:#777;
+  font-size:20px;
+  margin-bottom:42px;
+}
+
+.loginLabel{
+  display:block;
+  font-size:20px;
+  font-weight:800;
+  margin:20px 0 10px;
+}
+
+.loginInput{
+  width:100%;
+  padding:18px;
+  border:1px solid #d5d9df;
+  border-radius:10px;
+  font-size:20px;
+  box-sizing:border-box;
+}
+
+.loginButton{
+  width:100%;
+  margin-top:35px;
+  padding:18px;
+  background:#000;
+  color:#fff;
+  border:0;
+  border-radius:10px;
+  font-size:22px;
+  font-weight:800;
+}
+
+.loginHelp{
+  text-align:center;
+  color:#999;
+  margin-top:25px;
+  font-size:18px;
+}
+
+.loginFooter{
+  margin-top:35px;
+  text-align:center;
+  color:#777;
+  font-size:17px;
+}
 :root{--blue:#0b83f6;--dark:#111;--bg:#f4f6fa;--card:#fff;--line:#dde2ea;--muted:#667085;--green:#16a34a;--red:#dc2626}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:#111827;font-family:Arial,"Noto Sans SC",sans-serif}
 header{height:92px;background:#000;display:flex;align-items:center;justify-content:space-between;padding:10px 20px}
@@ -33,6 +132,51 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px;border-bottom:1px so
 </style>
 </head>
 <body>
+  <div id="loginScreen" class="loginScreen">
+
+  <div class="loginLogo">
+    <div class="cowash">COWASH</div>
+    <div class="laundry">LAUNDRY</div>
+  </div>
+
+  <div class="loginCard">
+
+    <h2>Login</h2>
+
+    <div class="loginSub">
+      Please enter your credentials to continue
+    </div>
+
+    <label class="loginLabel">Username</label>
+    <input id="loginUsername"
+           class="loginInput"
+           type="text"
+           placeholder="Enter username">
+
+    <label class="loginLabel">PIN (6 digits)</label>
+    <input id="loginPin"
+           class="loginInput"
+           type="password"
+           inputmode="numeric"
+           maxlength="6"
+           placeholder="Enter 6-digit PIN">
+
+    <button class="loginButton" onclick="doLogin()">
+      Login
+    </button>
+
+    <div class="loginHelp">
+      Contact admin if you forgot your PIN
+    </div>
+
+  </div>
+
+  <div class="loginFooter">
+    © 2026 Cowash Laundry. All rights reserved.<br>
+    Version 1.0.0
+  </div>
+
+  </div>
 <header>
 <div style="color:white;font-size:26px;font-weight:900;letter-spacing:1px">COWASH LAUNDRY</div>
 <select id="language" class="lang">
